@@ -1,5 +1,6 @@
 package com.austin.myapplication;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
@@ -10,10 +11,12 @@ import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -174,21 +177,24 @@ public class IngredientListFragment extends Fragment {
         ingredientDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                AlertDialog.Builder dateDialog = new AlertDialog.Builder(getContext());
-                dateDialog.setTitle("Enter Expiration Date");
-                final EditText dateInput = new EditText(getContext());
-                dateDialog.setView(dateInput);
+                DatePickerDialog dateDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener(){
 
-                dateDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        data.put(ingredientInput.getText().toString(), dateInput.getText().toString());
+                    public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                        data.put(ingredientInput.getText().toString(),
+                                (month + 1) + "/" + day + "/" + year);
                         mAdapter.notifyDataSetChanged();
                     }
-                });
 
-                dateDialog.setNegativeButton("Back", null);
+                }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)){
+                    @Override
+                    public void onDateChanged (DatePicker view, int year, int month, int dayOfMonth){
+                        super.onDateChanged(view, year, month, dayOfMonth);
+                        setTitle("Enter Expiration Date");
+                    }
+                };
 
+                dateDialog.setTitle("Enter Expiration Date");
                 dateDialog.show();
             }
         });
