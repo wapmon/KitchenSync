@@ -10,37 +10,31 @@ import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Created by austin on 7/24/16.
  */
 public class IngredientListAdapter extends BaseAdapter {
     Context context;
-    LinkedHashMap<String, String> data;
-    String[] keys;
+    List<String> mIngredientList;
+    List<String> mDateList;
 
-    public IngredientListAdapter(Context context, LinkedHashMap<String, String> data) {
+    public IngredientListAdapter(Context context, List<String> ingredientList, List<String> dateList) {
         this.context = context;
-        this.data = data;
-        this.keys = data.keySet().toArray(new String[data.size()]);
+        this.mIngredientList = ingredientList;
+        this.mDateList = dateList;
 
     }
-
-    @Override
-    public void notifyDataSetChanged(){
-        super.notifyDataSetChanged();
-        this.keys = data.keySet().toArray(new String[data.size()]);
-    }
-
 
     @Override
     public int getCount() {
-        return data.size();
+        return mIngredientList.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return data.get(keys[i]);
+        return mIngredientList.get(i);
     }
 
     @Override
@@ -50,8 +44,6 @@ public class IngredientListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int pos, View convertView, ViewGroup viewGroup) {
-        String key = keys[pos];
-        String value = getItem(pos).toString();
 
         if(convertView == null){
             LayoutInflater lInflater = (LayoutInflater)context.getSystemService(
@@ -63,8 +55,8 @@ public class IngredientListAdapter extends BaseAdapter {
         TextView ingredientName = (TextView) convertView.findViewById(R.id.ingredient_name);
         TextView dateText = (TextView) convertView.findViewById(R.id.date_text);
 
-        ingredientName.setText(key);
-        dateText.setText(value);
+        ingredientName.setText(mIngredientList.get(pos));
+        dateText.setText(mDateList.get(pos));
 
         return convertView;
     }
