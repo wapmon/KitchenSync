@@ -17,13 +17,11 @@ import java.util.List;
  */
 public class IngredientListAdapter extends BaseAdapter {
     Context context;
-    List<String> mIngredientList;
-    List<String> mDateList;
+    List<Ingredient> mIngredientList;
 
-    public IngredientListAdapter(Context context, List<String> ingredientList, List<String> dateList) {
+    public IngredientListAdapter(Context context, List<Ingredient> ingredientList) {
         this.context = context;
         this.mIngredientList = ingredientList;
-        this.mDateList = dateList;
 
     }
 
@@ -55,8 +53,8 @@ public class IngredientListAdapter extends BaseAdapter {
         TextView ingredientName = (TextView) convertView.findViewById(R.id.ingredient_name);
         TextView dateText = (TextView) convertView.findViewById(R.id.date_text);
 
-        ingredientName.setText(mIngredientList.get(pos));
-        dateText.setText(mDateList.get(pos));
+        ingredientName.setText(mIngredientList.get(pos).getIngredientName());
+        dateText.setText(mIngredientList.get(pos).getDate());
 
         return convertView;
     }

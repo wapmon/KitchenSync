@@ -19,6 +19,7 @@ import android.widget.ListView;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -38,8 +39,7 @@ public class IngredientListFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private ArrayList<String> mIngredientList;
-    private ArrayList<String> mDateList;
+    private ArrayList<Ingredient> mIngredientList;
     private IngredientListAdapter mAdapter;
     private View mView;
     private FloatingActionButton mAddIngredientButton;
@@ -136,7 +136,6 @@ public class IngredientListFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
         outState.putSerializable("mIngredinetList", (Serializable) mIngredientList);
-        outState.putSerializable("mDateList", (Serializable) mDateList);
     }
 
     @Override
@@ -145,20 +144,16 @@ public class IngredientListFragment extends Fragment {
 
         if (savedInstanceState != null) {
             //probably orientation change
-            mIngredientList = (ArrayList<String>) savedInstanceState.getSerializable("mIngredientList");
-            mDateList = (ArrayList<String>) savedInstanceState.getSerializable("mDateList");
+            mIngredientList = (ArrayList<Ingredient>) savedInstanceState.getSerializable("mIngredientList");
         } else {
-            if (mIngredientList != null && mDateList != null) {
+            if (mIngredientList != null) {
                 //returning from backstack, data is fine, do nothing
             } else {
                 //newly created, compute data
                 mIngredientList = new ArrayList<>();
-                mIngredientList.add("Ingredient One");
+                mIngredientList.add(new Ingredient("Ingredient One", "1/1/2016"));
 
-                mDateList = new ArrayList<>();
-                mDateList.add("1/1/2016");
-
-                mAdapter = new IngredientListAdapter(getContext(), mIngredientList, mDateList);
+                mAdapter = new IngredientListAdapter(getContext(), mIngredientList);
 
             }
         }
@@ -196,8 +191,7 @@ public class IngredientListFragment extends Fragment {
 
                     @Override
                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                        mIngredientList.add(ingredientInput.getText().toString());
-                        mDateList.add((month + 1) + "/" + day + "/" + year);
+                        mIngredientList.add(new Ingredient(ingredientInput.getText().toString(), (month + 1) + "/" + day + "/" + year));
                         mAdapter.notifyDataSetChanged();
                     }
 
@@ -224,16 +218,18 @@ public class IngredientListFragment extends Fragment {
         editIngredientDialog.setTitle("Edit Ingredient");
 
         final EditText editText = new EditText(getContext());
-        editText.setText(mIngredientList.get(pos));
+        editText.setText(mIngredientList.get(pos).getIngredientName());
         editIngredientDialog.setView(editText);
 
         editIngredientDialog.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                mIngredientList.set(pos, editText.getText().toString());
+                mIngredientList.get(pos).setIngredientName(editText.getText().toString());
                 mAdapter.notifyDataSetChanged();
             }
         });
+
+        editIngredientDialog.setNegativeButton("Cancel", null);
 
         editIngredientDialog.show();
     }
