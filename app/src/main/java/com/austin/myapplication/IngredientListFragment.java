@@ -16,6 +16,11 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -193,6 +198,15 @@ public class IngredientListFragment extends Fragment {
                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                         mIngredientList.add(new Ingredient(ingredientInput.getText().toString(), (month + 1) + "/" + day + "/" + year));
                         mAdapter.notifyDataSetChanged();
+                        try {
+                            HttpResponse<JsonNode> response;
+                            response = Unirest.get("https://community-food2fork.p.mashape.com/search?key=0df8e6e2d9c833d689e213ea3ddd7c96&q=shredded+chicken&sort=t")
+                                    .header("X-Mashape-Key", "X215ybFQb7mshXKcGKTsUtgwug4vp1nhm76jsnKKmtzzGfe2CI")
+                                    .header("Accept", "application/json")
+                                    .asJson();
+                        } catch (UnirestException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                 }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)){
