@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -21,12 +22,21 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 
 /**
  * A fragment with a Google +1 button.
@@ -48,6 +58,9 @@ public class IngredientListFragment extends Fragment {
     private IngredientListAdapter mAdapter;
     private View mView;
     private FloatingActionButton mAddIngredientButton;
+    private static final String API_URL_BASE = "http://food2fork.com/api/";
+    private static final String API_KEY = "0df8e6e2d9c833d689e213ea3ddd7c96";
+    private static final OkHttpClient client = new OkHttpClient();
 
     private OnFragmentInteractionListener mListener;
 
@@ -198,15 +211,27 @@ public class IngredientListFragment extends Fragment {
                     public void onDateSet(DatePicker datePicker, int year, int month, int day) {
                         mIngredientList.add(new Ingredient(ingredientInput.getText().toString(), (month + 1) + "/" + day + "/" + year));
                         mAdapter.notifyDataSetChanged();
-                        try {
-                            HttpResponse<JsonNode> response;
-                            response = Unirest.get("https://community-food2fork.p.mashape.com/search?key=0df8e6e2d9c833d689e213ea3ddd7c96&q=shredded+chicken&sort=t")
-                                    .header("X-Mashape-Key", "X215ybFQb7mshXKcGKTsUtgwug4vp1nhm76jsnKKmtzzGfe2CI")
-                                    .header("Accept", "application/json")
-                                    .asJson();
-                        } catch (UnirestException e) {
-                            e.printStackTrace();
+                        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+                        if (SDK_INT > 8)
+                        {
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                                    .permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+
+                            try {
+                                JSONObject searchResults = search("ground beef");
+
+                                final JSONObject recipe = getRecipe(getRecipeIds(searchResults).get(0));
+                                System.out.println(recipe.toString(2));
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
                         }
+
+
                     }
 
                 }, Calendar.getInstance().get(Calendar.YEAR), Calendar.getInstance().get(Calendar.MONTH), Calendar.getInstance().get(Calendar.DAY_OF_MONTH)){
@@ -248,4 +273,36 @@ public class IngredientListFragment extends Fragment {
         editIngredientDialog.show();
     }
 
+    /**
+     * Performs an HTTP GET and parses the response body as JSON.
+     */
+    private static JSONObject run(String url) throws IOException, JSONException {
+        final Request request = new Request.Builder().url(url).build();
+        final Response response = client.newCall(request).execute();
+        return new JSONObject(response.body().string());
+    }
+
+    public static JSONObject search(String query) throws IOException, JSONException {
+        final String url = API_URL_BASE + "search?key=" + API_KEY + "&q=" + URLEncoder.encode(query, "UTF-8");
+        return run(url);
+    }
+
+    public static JSONObject getRecipe(String id) throws IOException, JSONException {
+        final String url = API_URL_BASE + "get?key=" + API_KEY + "&rId=" + id;
+        return run(url);
+    }
+
+    /**
+     * Extracts recipe IDs from search results.
+     */
+    public static List<String> getRecipeIds(JSONObject result) throws IOException, JSONException {
+        final ArrayList<String> recipeIds = new ArrayList();
+        final JSONArray recipes = result.getJSONArray("recipes");
+        for (int i = 0; i < recipes.length(); ++i) {
+            final JSONObject recipe = recipes.getJSONObject(i);
+            final String id = recipe.getString("recipe_id");
+            recipeIds.add(id);
+        }
+        return recipeIds;
+    }
 }
