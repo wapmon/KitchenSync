@@ -13,11 +13,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, IngredientListFragment.OnFragmentInteractionListener,MainFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, IngredientListFragment.OnFragmentInteractionListener,MainFragment.OnFragmentInteractionListener,
+RecipeListFragment.OnFragmentInteractionListener{
 
     Fragment mContent;
     IngredientListFragment ingredientListFragment;
     MainFragment mMainFragment;
+    RecipeListFragment mRecipeFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +102,11 @@ public class MainActivity extends AppCompatActivity
                 mMainFragment = new MainFragment();
             }
             fragment = mMainFragment;
+        } else if(id == R.id.nav_recipe_list){
+            if(mRecipeFragment == null){
+                mRecipeFragment = new RecipeListFragment();
+            }
+            fragment = mRecipeFragment;
         }
 
         if(fragment != null){

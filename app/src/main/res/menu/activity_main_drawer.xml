@@ -13,6 +13,11 @@
             android:icon="@mipmap/chef_hat"
             android:title="Ingredient List" />
 
+        <item
+            android:id="@+id/nav_recipe_list"
+            android:icon="@drawable/cast_album_art_placeholder"
+            android:title="Recipes"/>
+
 
     </group>
 
