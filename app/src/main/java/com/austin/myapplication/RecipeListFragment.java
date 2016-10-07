@@ -48,7 +48,7 @@ public class RecipeListFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private List<Ingredient> mIngredientList;
     private List<String> mRecipeList;
-    private IngredientListAdapter mAdapter;
+    private RecipeListAdapter mAdapter;
     private View mView;
 
     public RecipeListFragment() {
@@ -125,21 +125,43 @@ public class RecipeListFragment extends Fragment {
                 mIngredientList = new ArrayList<>();
                 mRecipeList = new ArrayList<>();
 
-                new Thread(new Runnable() {
-                    public void run() {
-                        try {
-                            JSONObject searchResult = search("Avacado");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
+
+                mAdapter = new RecipeListAdapter(getContext(), mRecipeList);
             }
         }
 
         ListView recipeListView = (ListView) mView.findViewById(R.id.recipeListView);
+        recipeListView.setAdapter(mAdapter);
+        mAdapter.notifyDataSetChanged();
+
+        final JSONObject[] searchResult = new JSONObject[1];
+
+        /**
+         * TODO: Need to figure out a better way to make this
+         * TODO: call on a new thread, preferably make a new Async class
+         */
+        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+        if (SDK_INT > 8)
+        {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+                    .permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+
+            try {
+                searchResult[0] = search("Avocado");
+                JSONArray recipes = searchResult[0].getJSONArray("recipes");
+                mRecipeList.add(recipes.getJSONObject(0).getString("title"));
+                mAdapter.notifyDataSetChanged();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+
+
     }
 
     @Override
